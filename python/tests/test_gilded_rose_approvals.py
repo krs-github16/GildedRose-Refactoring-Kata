@@ -1,7 +1,10 @@
 import io
+import os
 import sys
 
-from approvaltests import verify
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+from approvaltests.approvals import verify
 from texttest_fixture import main
 
 def test_gilded_rose_approvals():
