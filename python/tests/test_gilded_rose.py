@@ -7,35 +7,35 @@ from gilded_rose import Item, GildedRose
 class GildedRoseTest(unittest.TestCase):
     #######################NORMAL ITEM TESTS#########################
     def test_normal_item_before_sell_date(self):
-        items = [Item("normal item", 5, 20)]
+        items = [Item("Normal Item", 5, 20)]
         gr = GildedRose(items)
         gr.update_quality()
         self.assertEqual(4, items[0].sell_in) # decreases by 1
         self.assertEqual(19, items[0].quality) # decreases by 1
 
     def test_normal_item_on_sell_date_quality_degrades_twice_as_fast(self):
-        items = [Item("normal item", 0, 20)]
+        items = [Item("Normal Item", 0, 20)]
         gr = GildedRose(items)
         gr.update_quality()
         self.assertEqual(-1, items[0].sell_in) # decreases by 1
         self.assertEqual(18, items[0].quality) # decreases by 2 because item is past sell date (sell_in<=0)
 
     def test_normal_item_after_sell_date_quality_degrades_twice_as_fast(self):
-        items = [Item("normal item", -1, 20)]
+        items = [Item("Normal Item", -1, 20)]
         gr = GildedRose(items)
         gr.update_quality()
         self.assertEqual(-2, items[0].sell_in) # decreases by 1
         self.assertEqual(18, items[0].quality) # decreases by 2 because item is past sell date (sell_in<=0)
 
     def test_normal_item_of_zero_quality(self):
-        items = [Item("normal item", 5, 0)]
+        items = [Item("Normal Item", 5, 0)]
         gr = GildedRose(items)
         gr.update_quality()
         self.assertEqual(4, items[0].sell_in) # decreases by 1
         self.assertEqual(0, items[0].quality) # stays the same, quality never negative
 
     def test_normal_item_of_quality_near_zero(self):
-        items = [Item("normal item", 5, 1)]
+        items = [Item("Normal Item", 5, 1)]
         gr = GildedRose(items)
         gr.update_quality() # first day
         gr.update_quality() # second day
@@ -43,14 +43,14 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(0, items[0].quality) # quality min threshold at 0
 
     def test_normal_item_of_quality_near_max(self):
-        items = [Item("normal item", 5, 49)]
+        items = [Item("Normal Item", 5, 49)]
         gr = GildedRose(items)
         gr.update_quality()
         self.assertEqual(4, items[0].sell_in) # decreases by 1
         self.assertEqual(48, items[0].quality) # decreases by 1
 
     def test_normal_item_of_max_quality(self):
-        items = [Item("normal item", 5, 50)]
+        items = [Item("Normal Item", 5, 50)]
         gr = GildedRose(items)
         gr.update_quality()
         self.assertEqual(4, items[0].sell_in) # decreases by 1
