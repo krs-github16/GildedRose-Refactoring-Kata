@@ -4,3 +4,5 @@
 .idea/
 *.iml
 .venv/
+.DS_Store
+htmlcov/
