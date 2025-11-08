@@ -14,34 +14,45 @@ class GildedRose(object):
 
         for item in self.items:
 
-            if item.name not in self.improving_items and item.name not in self.exceptional_items:
-                if item.quality > self.min_quality:
-                    item.quality -= 1 # degrade in quality for normal/regular items
+            if item.name in self.exceptional_items:
+                item.quality = self.exceptional_quality # enforce quality for exceptional items (sulfuras)
+                continue # do nothing else for exceptional items
+
+            if item.quality < self.min_quality:
+                item.quality = self.min_quality # enforce minimum quality
+            elif item.quality > self.max_quality:
+                item.quality = self.max_quality # enforce maximum quality
             else:
+                pass
+
+            if item.name in self.improving_items or item.name in self.exceptional_items:
                 if item.quality < self.max_quality:
                     increment = 1 # default increment for improving items
 
                     if item.name.startswith("Backstage passes"):
-                        increment += (item.sell_in < 11) + (item.sell_in < 6) # +1 if 10 days or less, +1 if 5 days or less
+                        increment += (item.sell_in <= 10) + (item.sell_in <= 5) # +1 if 10 days or less, +1 if 5 days or less
 
-                    item.quality = min(self.max_quality, item.quality + increment) # increase quality for improving items with cap at max_quality
+                    item.quality = min(item.quality + increment, self.max_quality) # increase quality with cap at max_quality
+            else:
+                if item.quality > self.min_quality:
+                    item.quality -= 1 # degrade in quality for normal items
 
-            if item.name not in self.exceptional_items:
-                item.sell_in -= 1
-
-            if item.sell_in < 0:
-                
-                if item.name.startswith("Backstage passes"):
-                    item.quality = 0
+            if item.sell_in <= 0:
 
                 if item.name == "Aged Brie":
-                    item.quality += 1
-                    item.quality = min(self.max_quality, item.quality)
+                    item.quality += 1 # Aged Brie further increases in quality after sell_in date
+                    item.quality = min(item.quality, self.max_quality) # capped at max_quality
+                
+                if item.name.startswith("Backstage passes"):
+                    item.quality = 0 # quality drops to 0 after concert
 
                 if item.name in self.exceptional_items or item.name in self.improving_items:
                     pass
-                elif item.quality > self.min_quality:
+
+                elif item.quality > self.min_quality: # normal items degrade twice as fast after sell_in date
                     item.quality -= 1
+
+            item.sell_in -= 1 # decrement sell_in for all but exceptional items
 
 
 class Item:

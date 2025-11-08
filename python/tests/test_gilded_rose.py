@@ -56,6 +56,13 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(4, items[0].sell_in) # decreases by 1
         self.assertEqual(49, items[0].quality) # decreases by 1
 
+    def test_normal_item_of_quality_greater_than_max(self):
+        items = [Item("Normal Item", 5, 51)]
+        gr = GildedRose(items)
+        gr.update_quality()
+        self.assertEqual(4, items[0].sell_in) # decreases by 1
+        self.assertEqual(49, items[0].quality) # decreases by 1 from max cap 50
+
     #######################AGED BRIE TESTS#########################
     def test_aged_brie_before_sell_date(self):
         items = [Item("Aged Brie", 5, 20)]
@@ -107,6 +114,13 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(4, items[0].sell_in) # decreases by 1
         self.assertEqual(50, items[0].quality) # quality max capped at 50
 
+    def test_aged_brie_of_quality_greater_than_max(self):
+        items = [Item("Aged Brie", 5, 51)]
+        gr = GildedRose(items)
+        gr.update_quality()
+        self.assertEqual(4, items[0].sell_in) # decreases by 1
+        self.assertEqual(50, items[0].quality) # quality max capped at 50
+
 
     #######################SULFURAS TESTS#########################
     def test_sulfuras_before_sell_date(self):
@@ -129,6 +143,13 @@ class GildedRoseTest(unittest.TestCase):
         gr.update_quality()
         self.assertEqual(-1, items[0].sell_in) # no update
         self.assertEqual(80, items[0].quality) # no update
+
+    def test_sulfuras_of_quality_less_than_exceptional(self):
+        items = [Item("Sulfuras, Hand of Ragnaros", 5, 70)]
+        gr = GildedRose(items)
+        gr.update_quality()
+        self.assertEqual(5, items[0].sell_in) # no update
+        self.assertEqual(80, items[0].quality) # quality reset to exceptional quality 80
 
     #########################BACKSTAGE PASS TESTS#########################
     def test_backstage_pass_long_before_sell_date(self):
@@ -218,6 +239,13 @@ class GildedRoseTest(unittest.TestCase):
 
     def test_backstage_pass_of_max_quality(self):
         items = [Item("Backstage passes to a TAFKAL80ETC concert", 5, 50)]
+        gr = GildedRose(items)
+        gr.update_quality()
+        self.assertEqual(4, items[0].sell_in) # decreases by 1
+        self.assertEqual(50, items[0].quality) # quality max capped at 50
+
+    def test_backstage_pass_of_quality_greater_than_max(self):
+        items = [Item("Backstage passes to a TAFKAL80ETC concert", 5, 51)]
         gr = GildedRose(items)
         gr.update_quality()
         self.assertEqual(4, items[0].sell_in) # decreases by 1
