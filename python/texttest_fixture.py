@@ -16,6 +16,10 @@ def main():
         Item(name="Backstage passes to a TAFKAL80ETC concert", sell_in=10, quality=49),
         Item(name="Backstage passes to a TAFKAL80ETC concert", sell_in=5, quality=49),
         Item(name="Conjured Mana Cake", sell_in=3, quality=6),  # <-- :O
+        ## Additional items for testing
+        Item(name="Normal Item", sell_in=5, quality=10),
+        Item(name="Backstage passes to a ANY concert", sell_in=15, quality=35),
+        Item(name="Conjured Any Item", sell_in=8, quality=50), 
     ]
     days = 2
     import sys
