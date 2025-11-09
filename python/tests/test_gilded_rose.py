@@ -82,6 +82,12 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(4, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(49, gr.items[0].quality) # decreases by 1 from max cap 50
 
+    def test_normal_item_of_quality_less_than_min_at_sell_in_zero(self):
+        gr = self.factory("Normal Item", 0, -1)
+        gr.update_quality()
+        self.assertEqual(-1, gr.items[0].sell_in) # decreases by 1
+        self.assertEqual(0, gr.items[0].quality) # quality min threshold at 0
+
     def test_normal_item_of_quality_greater_than_max_at_sell_in_zero(self):
         gr = self.factory("Normal Item", 0, 51)
         gr.update_quality()
@@ -138,6 +144,12 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(4, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(50, gr.items[0].quality) # quality max capped at 50
 
+    def test_aged_brie_of_quality_less_than_min_at_sell_in_zero(self):
+        gr = self.factory("Aged Brie", 0, -1)
+        gr.update_quality()
+        self.assertEqual(-1, gr.items[0].sell_in) # decreases by 1
+        self.assertEqual(2, gr.items[0].quality) # quality min capped at 0 and increases by 2
+
     def test_aged_brie_of_quality_greater_than_max_at_sell_in_zero(self):
         gr = self.factory("Aged Brie", 0, 51)
         gr.update_quality()
@@ -170,6 +182,12 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(5, gr.items[0].sell_in) # no update
         self.assertEqual(80, gr.items[0].quality) # quality reset to exceptional quality 80
 
+    def test_sulfuras_of_quality_greater_than_exceptional(self):
+        gr = self.factory("Sulfuras, Hand of Ragnaros", 5, 90)
+        gr.update_quality()
+        self.assertEqual(5, gr.items[0].sell_in) # no update
+        self.assertEqual(80, gr.items[0].quality) # quality reset to exceptional quality 80
+
     #########################BACKSTAGE PASS TESTS#########################
     def test_backstage_pass_long_before_sell_date(self):
         gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 15, 20)
@@ -178,7 +196,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(21, gr.items[0].quality) # increases by 1 because sell_in>10
 
     def test_backstage_pass_medium_close_to_sell_date(self):
-        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 10, 20)
+        gr = self.factory("Backstage passes to a TETCBL66AFK concert", 10, 20)
         gr.update_quality()
         self.assertEqual(9, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(22, gr.items[0].quality) # increases by 2 because 5<sell_in<=10
@@ -190,7 +208,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(23, gr.items[0].quality) # increases by 3 because 0<sell_in<=5
 
     def test_backstage_pass_on_sell_date(self):
-        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 0, 20)
+        gr = self.factory("Backstage passes to a TETCBL66AFK concert", 0, 20)
         gr.update_quality()
         self.assertEqual(-1, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(0, gr.items[0].quality) # drops to 0 because sell_in<=0
@@ -202,7 +220,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(0, gr.items[0].quality) # drops to 0 because sell_in<=0
 
     def test_backstage_pass_of_zero_quality(self):
-        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 5, 0)
+        gr = self.factory("Backstage passes to a TETCBL66AFK concert", 5, 0)
         gr.update_quality()
         self.assertEqual(4, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(3, gr.items[0].quality) # increases by 3 because 0<sell_in<=5
@@ -214,7 +232,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(4, gr.items[0].quality) # increases by 3 because 0<sell_in<=5
 
     def test_backstage_pass_of_quality_at_5(self):
-        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 5, 15)
+        gr = self.factory("Backstage passes to a TETCBL66AFK concert", 5, 15)
         gr.update_quality()
         self.assertEqual(4, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(18, gr.items[0].quality) # increases by 3 because 0<sell_in<=5
@@ -226,7 +244,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(22, gr.items[0].quality) # increases by 2 because 5<sell_in<=10
 
     def test_backstage_pass_of_quality_at_10(self):
-        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 10, 30)
+        gr = self.factory("Backstage passes to a TETCBL66AFK concert", 10, 30)
         gr.update_quality()
         self.assertEqual(9, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(32, gr.items[0].quality) # increases by 2 because 5<sell_in<=10
@@ -238,7 +256,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(21, gr.items[0].quality) # increases by 1 because sell_in>10
 
     def test_backstage_pass_of_quality_near_max(self):
-        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 5, 49)
+        gr = self.factory("Backstage passes to a TETCBL66AFK concert", 5, 49)
         gr.update_quality() # first day
         gr.update_quality() # second day
         self.assertEqual(3, gr.items[0].sell_in) # decreases by 1
@@ -251,13 +269,19 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(50, gr.items[0].quality) # quality max capped at 50
 
     def test_backstage_pass_of_quality_greater_than_max(self):
-        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 5, 51)
+        gr = self.factory("Backstage passes to a TETCBL66AFK concert", 5, 51)
         gr.update_quality()
         self.assertEqual(4, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(50, gr.items[0].quality) # quality max capped at 50
 
+    def test_backstage_pass_of_quality_less_than_min_at_sell_in_zero(self):
+        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 0, -1)
+        gr.update_quality()
+        self.assertEqual(-1, gr.items[0].sell_in) # decreases by 1
+        self.assertEqual(0, gr.items[0].quality) # quality min capped at 0
+
     def test_backstage_pass_of_quality_greater_than_max_at_sell_in_zero(self):
-        gr = self.factory("Backstage passes to a TAFKAL80ETC concert", 0, 51)
+        gr = self.factory("Backstage passes to a TETCBL66AFK concert", 0, 51)
         gr.update_quality()
         self.assertEqual(-1, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(0, gr.items[0].quality) # drops to 0 because sell_in<=0
@@ -270,7 +294,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(18, gr.items[0].quality) # decreases by 2
 
     def test_conjured_item_on_sell_date_quality_degrades_twice_as_fast(self):
-        gr = self.factory("Conjured Mana Cake", 0, 20)
+        gr = self.factory("Conjured Other", 0, 20)
         gr.update_quality()
         self.assertEqual(-1, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(16, gr.items[0].quality) # decreases by 4
@@ -282,7 +306,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(16, gr.items[0].quality) # decreases by 4
 
     def test_conjured_item_of_zero_quality(self):
-        gr = self.factory("Conjured Mana Cake", 5, 0)
+        gr = self.factory("Conjured Other", 5, 0)
         gr.update_quality()
         self.assertEqual(4, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(0, gr.items[0].quality) # stays the same, quality never negative
@@ -294,7 +318,7 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(0, gr.items[0].quality) # quality min capped at 0
 
     def test_conjured_item_of_quality_near_max(self):
-        gr = self.factory("Conjured Mana Cake", 5, 49)
+        gr = self.factory("Conjured Other", 5, 49)
         gr.update_quality()
         self.assertEqual(4, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(47, gr.items[0].quality) # decreases by 2
@@ -306,10 +330,16 @@ class GildedRoseTest(unittest.TestCase):
         self.assertEqual(48, gr.items[0].quality) # decreases by 2
 
     def test_conjured_item_of_quality_greater_than_max(self):
-        gr = self.factory("Conjured Mana Cake", 5, 51)
+        gr = self.factory("Conjured Other", 5, 51)
         gr.update_quality()
         self.assertEqual(4, gr.items[0].sell_in) # decreases by 1
         self.assertEqual(48, gr.items[0].quality) # decreases by 2 from max cap 50
+
+    def test_conjured_item_of_quality_less_than_min_at_sell_in_zero(self):
+        gr = self.factory("Conjured Other", 0, -1)
+        gr.update_quality()
+        self.assertEqual(-1, gr.items[0].sell_in) # decreases by 1
+        self.assertEqual(0, gr.items[0].quality) # quality min threshold at 0
 
     def test_conjured_item_of_quality_greater_than_max_at_sell_in_zero(self):
         gr = self.factory("Conjured Mana Cake", 0, 51)
