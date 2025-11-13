@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from enum import Enum
 
 class Item:
     def __init__(self, name: str, sell_in: int, quality: int):
@@ -14,48 +15,32 @@ class Item:
     def __repr__(self):
         return "%s, %s, %s" % (self.name, self.sell_in, self.quality)
 
+class ProductList(Enum):
+    """Enumerated list of available products for easy reference."""
 
-class GildedRose(object):
-    """Class representing the Gilded Rose inventory system"""
+    AGED_BRIE = "Aged Brie"
+    BACKSTAGE_PASS = "Backstage passes" # startswith , flexible for any concert
+    SULFURAS = "Sulfuras, Hand of Ragnaros"
+    CONJURED = "Conjured" # startswith, flexible for any conjured item
 
-    def __init__(self, items: list[Item]):
-        """Initialize GildedRose with a list of items; set quality bounds and legendary items"""
+class GildedRoseUpdater():
 
-        self.items = items
+    def __init__(self):
 
         self.MIN_QUALITY = 0
         self.MAX_QUALITY = 50
 
         self.LEGENDARY_QUALITY = 80 # for Sulfuras
-        self.LEGENDARY_ITEMS = ["Sulfuras, Hand of Ragnaros"] # never has to be sold or decreases in quality
 
         self.BACKSTAGE_PASS_THRESHOLD_1 = 10 # days before concert when backstage pass quality increases faster
         self.BACKSTAGE_PASS_THRESHOLD_2 = 5  # days before concert when backstage pass quality increases fastest
-
-    #### Item type check helper methods
-
-    def is_aged_brie(self, item: Item) -> bool:
-        """Check if the item is 'Aged Brie'"""
-        return item.name == "Aged Brie"
-
-    def is_backstage_pass(self, item: Item) -> bool:
-        """Check if the item is a 'Backstage pass'. Flexible to allow for different concert names"""
-        return item.name.startswith("Backstage passes")
-
-    def is_conjured(self, item: Item) -> bool:
-        """Check if the item is a 'Conjured' item. Flexible to allow for different conjured items"""
-        return item.name.startswith("Conjured")
-
-    def is_legendary(self, item: Item) -> bool:
-        """Check if the item is legendary (e.g. Sulfuras)"""
-        return item.name in self.LEGENDARY_ITEMS
     
     ### Quality boundary check helper methods
 
-    def normalize_quality(self, item: Item) -> None:
+    def _normalize_quality(self, item: Item) -> None:
         """Ensure item's quality is within configured bounds"""
 
-        if self.is_legendary(item):
+        if item.name == ProductList.SULFURAS.value:
             item.quality = self.LEGENDARY_QUALITY 
         else:
             item.quality = max(item.quality, self.MIN_QUALITY) # cap quality at min_quality when quality is too low < 0
@@ -66,7 +51,7 @@ class GildedRose(object):
     def _update_sell_in(self, item: Item) -> None:
         """Update sell_in for non-legendary items"""
 
-        if self.is_legendary(item):
+        if item.name == ProductList.SULFURAS.value:
             pass
         else:
             item.sell_in -= 1
@@ -119,29 +104,56 @@ class GildedRose(object):
 
         item.quality = max((item.quality + change), self.MIN_QUALITY)
 
+class GildedRose(object):
+    """Class representing the Gilded Rose inventory system"""
+
+    def __init__(self, items: list[Item]):
+        """Initialize GildedRose with a list of items; set quality bounds and legendary items"""
+
+        self.items = items
+
+    #### Item type check helper methods
+
+    def is_aged_brie(self, item: Item) -> bool:
+        """Check if the item is 'Aged Brie'"""
+        return item.name == ProductList.AGED_BRIE.value
+
+    def is_backstage_pass(self, item: Item) -> bool:
+        """Check if the item is a 'Backstage pass'. Flexible to allow for different concert names"""
+        return item.name.startswith(ProductList.BACKSTAGE_PASS.value)
+
+    def is_legendary(self, item: Item) -> bool:
+        """Check if the item is legendary (e.g. Sulfuras)"""
+        return item.name == ProductList.SULFURAS.value
+        
+    def is_conjured(self, item: Item) -> bool:
+        """Check if the item is a 'Conjured' item. Flexible to allow for different conjured items"""
+        return item.name.startswith(ProductList.CONJURED.value)
+
     def update_quality(self):
         """Update quality and sell_in for all items for one day; legendary items do not change"""
+        
+        updater = GildedRoseUpdater()
 
         for item in self.items:
 
-            self.normalize_quality(item)
+            updater._normalize_quality(item)
 
             if self.is_aged_brie(item):
-                self._update_aged_brie_quality(item)
+                updater._update_aged_brie_quality(item)
 
             elif self.is_backstage_pass(item):
-                self._update_backstage_pass_item_quality(item)
+                updater._update_backstage_pass_item_quality(item)
 
             elif self.is_legendary(item):
-                pass # legendary items do not change
+                pass
 
             elif self.is_conjured(item):
-                self._update_conjured_item_quality(item)
+                updater._update_conjured_item_quality(item)
 
             else:
-                self._update_normal_item_quality(item)
+                updater._update_normal_item_quality(item)
 
-            self._update_sell_in(item)
-
+            updater._update_sell_in(item)
 
 # End of gilded_rose.py
