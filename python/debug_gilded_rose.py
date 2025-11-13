@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simple driver to run and debug GildedRose.update_quality from the terminal.
+"""Simple driver to run and debug GildedRose.update from the terminal.
 
 Usage examples (from repo root):
   # run with the repo venv python (recommended)
@@ -17,7 +17,8 @@ Use --step to pause between days for manual inspection, or --pdb to drop into pd
 """
 
 import argparse
-from gilded_rose import Item, GildedRose
+from item import Item
+from gilded_rose import GildedRose
 import sys
 
 
@@ -41,7 +42,7 @@ def items_to_lines(items: list[Item]) -> list[str]:
 
 def main(argv=None) -> None:
     argv = argv if argv is not None else sys.argv[1:]
-    p = argparse.ArgumentParser(description='Run and debug GildedRose.update_quality')
+    p = argparse.ArgumentParser(description='Run and debug GildedRose.update')
     p.add_argument('-i', '--item', action='append', type=parse_item,
                    help="Item spec 'name,sell_in,quality' (can be repeated)")
     p.add_argument('-d', '--days', type=int, default=1, help='Number of days to simulate')
@@ -74,11 +75,11 @@ def main(argv=None) -> None:
 
         if args.pdb:
             import pdb
-            print('\nEntering pdb before calling update_quality() - use n/s to step, p to print variables')
+            print('\nEntering pdb before calling update() - use n/s to step, p to print variables')
             pdb.set_trace()
 
         # method to debug iteratively
-        gr.update_quality()
+        gr.update()
 
         print(f'\n=== Day {day} - after update ===')
         for line in items_to_lines(gr.items):
@@ -95,7 +96,7 @@ if __name__ == '__main__':
 
 # n (next) — execute next line
 
-# s (step) — step into function call (useful to step into update_quality)
+# s (step) — step into function call (useful to step into update)
 
 # l (list) — show source
 

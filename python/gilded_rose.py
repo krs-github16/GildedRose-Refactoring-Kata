@@ -1,108 +1,7 @@
 # -*- coding: utf-8 -*-
-from enum import Enum
-
-class Item:
-    def __init__(self, name: str, sell_in: int, quality: int):
-        """
-        :param name (str): name of the item
-        :param sell_in (int): # of days we have to sell the item; decreases by 1 each day
-        :param quality (int): how valuable the item is (bounded in most cases between 0 and 50)
-        """
-        self.name = name
-        self.sell_in = sell_in
-        self.quality = quality
-
-    def __repr__(self):
-        return "%s, %s, %s" % (self.name, self.sell_in, self.quality)
-
-class ProductList(Enum):
-    """Enumerated list of available products for easy reference."""
-
-    AGED_BRIE = "Aged Brie"
-    BACKSTAGE_PASS = "Backstage passes" # startswith , flexible for any concert
-    SULFURAS = "Sulfuras, Hand of Ragnaros"
-    CONJURED = "Conjured" # startswith, flexible for any conjured item
-
-class GildedRoseUpdater():
-
-    def __init__(self):
-
-        self.MIN_QUALITY = 0
-        self.MAX_QUALITY = 50
-
-        self.LEGENDARY_QUALITY = 80 # for Sulfuras
-
-        self.BACKSTAGE_PASS_THRESHOLD_1 = 10 # days before concert when backstage pass quality increases faster
-        self.BACKSTAGE_PASS_THRESHOLD_2 = 5  # days before concert when backstage pass quality increases fastest
-    
-    ### Quality boundary check helper methods
-
-    def _normalize_quality(self, item: Item) -> None:
-        """Ensure item's quality is within configured bounds"""
-
-        if item.name == ProductList.SULFURAS.value:
-            item.quality = self.LEGENDARY_QUALITY 
-        else:
-            item.quality = max(item.quality, self.MIN_QUALITY) # cap quality at min_quality when quality is too low < 0
-            item.quality = min(item.quality, self.MAX_QUALITY) # cap quality at max_quality when quality is too high > 50
-        
-    #### Update methods for different item types for one day (sell_in decrement handled separately)
-
-    def _update_sell_in(self, item: Item) -> None:
-        """Update sell_in for non-legendary items"""
-
-        if item.name == ProductList.SULFURAS.value:
-            pass
-        else:
-            item.sell_in -= 1
-            
-    def _update_normal_item_quality(self, item: Item) -> None:
-        '''Update method for normal items'''
-
-        if item.sell_in > 0: 
-            change = -1
-        else:
-            change = -2
-
-        item.quality = max((item.quality + change), self.MIN_QUALITY)
-
-    def _update_aged_brie_quality(self, item: Item) -> None:
-        '''Update method for Aged Brie items'''
-
-        if item.sell_in > 0:
-            change = 1
-        else:
-            change = 2
-
-        item.quality = min((item.quality + change), self.MAX_QUALITY)
-
-    def _update_backstage_pass_item_quality(self, item: Item) -> None:
-        '''Update method for backstage pass items'''
-
-        if item.sell_in > self.BACKSTAGE_PASS_THRESHOLD_1:
-            change = 1
-        elif item.sell_in > self.BACKSTAGE_PASS_THRESHOLD_2:
-            change = 2
-        elif item.sell_in > 0:
-            change = 3
-        else:
-            item.quality = 0
-            change = 0
-
-        item.quality = min((item.quality + change), self.MAX_QUALITY)
-
-    def _update_conjured_item_quality(self, item: Item) -> None:
-        '''
-        Update method for conjured items
-        Quality degrades twice as fast as normal items
-        '''
-
-        if item.sell_in > 0:
-            change = -2
-        else:
-            change = -4
-
-        item.quality = max((item.quality + change), self.MIN_QUALITY)
+from item import Item
+from product_list import ProductList
+from gilded_rose_updater import GildedRoseUpdater
 
 class GildedRose(object):
     """Class representing the Gilded Rose inventory system"""
@@ -130,7 +29,7 @@ class GildedRose(object):
         """Check if the item is a 'Conjured' item. Flexible to allow for different conjured items"""
         return item.name.startswith(ProductList.CONJURED.value)
 
-    def update_quality(self):
+    def update(self):
         """Update quality and sell_in for all items for one day; legendary items do not change"""
         
         updater = GildedRoseUpdater()
